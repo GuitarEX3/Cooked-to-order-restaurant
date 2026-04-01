@@ -57,11 +57,11 @@
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
 
-        @media (max-width: 640px) { .menu-container { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) { .menu-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; } }
 
         .menu-item {
             background: var(--white);
@@ -883,7 +883,7 @@
             let mapLink = locationMode === 'pin' ? `https://www.google.com/maps?q=${pinLocation.lat},${pinLocation.lng}` : '';
 
             const orderMessage = `
-🛒 สั่งอาหาร
+🛒 มีออเดอร์ใหม่!
 
 👤 ลูกค้า: ${name}
 📞 เบอร์: ${phone}
