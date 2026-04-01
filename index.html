@@ -915,10 +915,11 @@ ${note ? '\n📝 หมายเหตุ: ' + note : ''}
                 });
 
                 if (liff.isLoggedIn()) {
-                    await liff.sendMessages([
-                 { type: 'text', text: orderMessage },
-                 { type: 'text', text: 'สั่งอาหาร' }
-                                            ]);
+                    // ลบ 2 บรรทัดเดิมออก แล้วใส่แบบนี้แทน
+              await liff.sendMessages([
+                    { type: 'text', text: orderMessage },
+                    { type: 'text', text: 'สั่งอาหาร' }
+                                     ]);
                     alert('✅ สั่งอาหารสำเร็จ!\nข้อมูลถูกส่งไปยังร้านแล้ว');
                     liff.closeWindow();
                 } else {
