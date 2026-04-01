@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ร้านอาหารไทยต้นตำรับ</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-dark: #1a4d2e;
+            --green-medium: #2d6a4f;
+            --green-light: #52b788;
+            --green-accent: #74c69d;
+            --black: #0a0a0a;
+            --white: #ffffff;
+            --cream: #f8f9f5;
+            --shadow: rgba(26, 77, 46, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Sarabun', -apple-system, sans-serif;
+            background: var(--cream);
+            color: var(--black);
+            padding-bottom: 100px;
+        }
+
+        .header {
+            background: var(--green-dark);
+            padding: 30px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--green-light);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .header h1 {
+            font-family: 'Kanit', sans-serif;
+            color: var(--white);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header p { color: var(--green-accent); font-size: 15px; font-weight: 300; letter-spacing: 1px; }
+
+        .menu-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 640px) { .menu-container { grid-template-columns: 1fr; } }
+
+        .menu-item {
+            background: var(--white);
+            border: 2px solid var(--green-dark);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--shadow);
+            border-color: var(--green-light);
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green-light), var(--green-accent));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .menu-item:hover::before { transform: scaleX(1); }
+
+        .menu-image-wrapper {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            background: var(--black);
+        }
+
+        .menu-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .menu-item:hover .menu-image { transform: scale(1.08); }
+
+        .menu-badge {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: var(--green-light);
+            color: var(--white);
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid var(--white);
+        }
+
+        .menu-info { padding: 18px; background: var(--white); }
+
+        .menu-name {
+            font-family: 'Kanit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--green-dark);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .menu-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            min-height: 40px;
+        }
+
+        .menu-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .menu-price {
+            font-family: 'Kanit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--green-dark);
+        }
+
+        .menu-price span { font-size: 16px; color: #999; margin-left: 2px; }
+
+        .add-btn {
+            background: var(--green-dark);
+            color: var(--white);
+            border: 2px solid var(--green-dark);
+            padding: 10px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Kanit', sans-serif;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .add-btn:hover { background: var(--white); color: var(--green-dark); }
+        .add-btn:active { transform: scale(0.95); }
+
+        .cart-float {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: var(--green-dark);
+            color: var(--white);
+            width: 70px; height: 70px;
+            border: 3px solid var(--green-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 24px rgba(26, 77, 46, 0.4);
+            cursor: pointer;
+            font-size: 28px;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .cart-float:hover { transform: scale(1.1); background: var(--green-medium); }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px; right: -8px;
+            background: var(--green-light);
+            color: var(--white);
+            width: 32px; height: 32px;
+            border: 2px solid var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            z-index: 2000;
+            overflow-y: auto;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            margin: 40px auto;
+            border: 3px solid var(--green-dark);
+            padding: 0;
+            max-width: 550px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 28px;
+            background: var(--green-dark);
+            border-bottom: 3px solid var(--green-light);
+        }
+
+        .modal-header h2 {
+            font-family: 'Kanit', sans-serif;
+            color: var(--white);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .close-btn { font-size: 32px; color: var(--white); cursor: pointer; line-height: 1; transition: color 0.3s; font-weight: 300; }
+        .close-btn:hover { color: var(--green-accent); }
+
+        .modal-body { padding: 28px; }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--cream);
+            border: 1px solid var(--green-dark);
+            margin-bottom: 12px;
+        }
+
+        .cart-item-info { flex: 1; }
+
+        .cart-item-name {
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            color: var(--green-dark);
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+
+        .cart-item-price { color: var(--green-medium); font-weight: 600; font-size: 14px; }
+
+        .cart-item-qty { display: flex; align-items: center; gap: 12px; }
+
+        .qty-btn {
+            background: var(--green-dark);
+            color: var(--white);
+            border: none;
+            width: 36px; height: 36px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .qty-btn:hover { background: var(--green-medium); }
+        .qty-btn:active { transform: scale(0.9); }
+
+        .qty-display {
+            min-width: 36px;
+            text-align: center;
+            font-weight: 700;
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            color: var(--green-dark);
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--green-dark);
+            font-weight: 600;
+            font-family: 'Kanit', sans-serif;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--green-dark);
+            background: var(--white);
+            font-size: 15px;
+            font-family: 'Sarabun', sans-serif;
+            color: var(--black);
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--green-light);
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 90px; }
+
+        .location-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+
+        .toggle-btn {
+            padding: 14px;
+            border: 2px solid var(--green-dark);
+            background: var(--white);
+            color: var(--green-dark);
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Kanit', sans-serif;
+            transition: all 0.3s;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-btn.active { background: var(--green-dark); color: var(--white); }
+        .toggle-btn:hover:not(.active) { background: var(--cream); }
+
+        .pin-location-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--green-medium);
+            color: var(--white);
+            border: 2px solid var(--green-medium);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .pin-location-btn:hover { background: var(--green-dark); border-color: var(--green-dark); }
+
+        .location-display {
+            background: #e8f5e9;
+            padding: 14px;
+            border: 1px solid var(--green-light);
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--green-dark);
+            display: none;
+        }
+
+        .location-display a { color: var(--green-medium); font-weight: 600; }
+
+        .total-section {
+            background: var(--green-dark);
+            color: var(--white);
+            padding: 24px;
+            border: 3px solid var(--green-light);
+            margin: 24px 0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            background: var(--green-light);
+            color: var(--white);
+            border: 3px solid var(--green-light);
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover { background: var(--white); color: var(--green-dark); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+
+        .empty-cart { text-align: center; padding: 60px 20px; color: #999; }
+        .empty-cart-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.3; }
+
+        .loading { display: none; text-align: center; padding: 30px; }
+
+        .spinner {
+            border: 4px solid var(--cream);
+            border-top: 4px solid var(--green-dark);
+            width: 50px; height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .section-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--green-dark);
+            margin: 28px 0 18px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--green-light);
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍃 ครัวไทยต้นตำรับ</h1>
+        <p>อาหารไทยรสชาติต้นตำรับ • สั่งง่าย ส่งไว</p>
+    </div>
+
+    <div class="menu-container" id="menuContainer"></div>
+
+    <div class="cart-float" onclick="openCart()">
+        🛒
+        <div class="cart-badge" id="cartBadge">0</div>
+    </div>
+
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛒 ตระกร้าของคุณ</h2>
+                <span class="close-btn" onclick="closeCart()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="cartItems"></div>
+                <div class="total-section" id="totalSection" style="display:none;">
+                    <div class="total-row">
+                        <span>ยอดรวม</span>
+                        <span id="totalPrice">0 ฿</span>
+                    </div>
+                </div>
+                <div id="checkoutForm" style="display:none;">
+                    <h3 class="section-title">📝 ข้อมูลการจัดส่ง</h3>
+                    <div class="form-group">
+                        <label>ชื่อ-นามสกุล *</label>
+                        <input type="text" id="customerName" placeholder="กรอกชื่อของคุณ" required>
+                    </div>
+                    <div class="form-group">
+                        <label>เบอร์โทรศัพท์ *</label>
+                        <input type="tel" id="customerPhone" placeholder="0xx-xxx-xxxx" required>
+                    </div>
+                    <div class="form-group">
+                        <label>เลือกวิธีระบุที่อยู่ *</label>
+                        <div class="location-toggle">
+                            <button class="toggle-btn active" onclick="switchLocationMode('address')">📍 พิมพ์ที่อยู่</button>
+                            <button class="toggle-btn" onclick="switchLocationMode('pin')">📌 ปักหมุด</button>
+                        </div>
+                    </div>
+                    <div id="addressInput" class="form-group">
+                        <label>ที่อยู่จัดส่ง</label>
+                        <textarea id="customerAddress" placeholder="บ้านเลขที่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์"></textarea>
+                    </div>
+                    <div id="pinInput" class="form-group" style="display:none;">
+                        <button class="pin-location-btn" onclick="getLocation()">📍 ปักหมุดตำแหน่งปัจจุบัน</button>
+                        <div class="location-display" id="locationDisplay"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+                        <textarea id="customerNote" placeholder="เช่น อย่าใส่ผักชี, เผ็ดน้อย"></textarea>
+                    </div>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>กำลังส่งออเดอร์...</p>
+                    </div>
+                    <button class="submit-btn" onclick="submitOrder()">✓ ยืนยันการสั่งอาหาร</button>
+                </div>
+                <div class="empty-cart" id="emptyCart">
+                    <div class="empty-cart-icon">🛒</div>
+                    <p style="font-size:18px;font-weight:600;color:#666;margin-bottom:8px;">ตระกร้าของคุณว่างเปล่า</p>
+                    <p style="font-size:14px;color:#999;">เลือกเมนูอาหารที่คุณชอบกันเถอะ!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const menuData = [
+            // ===== เมนูเดิม 15 รายการ (อัปเดตรูป) =====
+            {
+                id: 1,
+                name: 'ผัดไทยกุ้งสด',
+                desc: 'ผัดไทยกุ้งสด ใส่ถั่วงอก ไข่ หอมหวาน รสชาติต้นตำรับ',
+                price: 65,
+                badge: 'ยอดนิยม',
+                image: 'https://img.wongnai.com/p/1920p0/2019/09/24/e1dcad3dbf5e4d4cb28cfd3ef9f0c2f5.jpg'
+            },
+            {
+                id: 2,
+                name: 'ต้มยำกุ้งน้ำข้น',
+                desc: 'ต้มยำกุ้งน้ำข้น รสจัดจ้าน กุ้งสดใหญ่ เครื่องแน่น',
+                price: 120,
+                badge: 'แนะนำ',
+                image: 'https://img.wongnai.com/p/1920p0/2021/07/07/9b5f1e6bd0c24b0e9c47a2b96b2c6e38.jpg'
+            },
+            {
+                id: 3,
+                name: 'ผัดกระเพราหมูสับ',
+                desc: 'กระเพราหมูสับ ไข่ดาว เผ็ดร้อนๆ หอม กลมกล่อม',
+                price: 50,
+                badge: 'ฮิต',
+                image: 'https://img.wongnai.com/p/1920p0/2021/02/17/dc18a4bcf2dc4e7f8d91ce1f5c3f9e2c.jpg'
+            },
+            {
+                id: 4,
+                name: 'ส้มตำไทย',
+                desc: 'ส้มตำไทยดั้งเดิม ใส่ถั่วลิสงคั่ว มะเขือเทศ ปลาร้า',
+                price: 45,
+                image: 'https://img.wongnai.com/p/1920p0/2020/05/04/f2b7e3a1d4c14f6b9e8a5d2c7b9f1e3a.jpg'
+            },
+            {
+                id: 5,
+                name: 'แกงเขียวหวานไก่',
+                desc: 'แกงเขียวหวานไก่ ใส่มะเขือ ใบโหระพา กะทิหอมมัน',
+                price: 80,
+                image: 'https://img.wongnai.com/p/1920p0/2019/11/13/5b2a8c7d1e3f4a9b6c8d2e7f1a3b5c9d.jpg'
+            },
+            {
+                id: 6,
+                name: 'ข้าวมันไก่ทอด',
+                desc: 'ข้าวมันไก่ทอด กรอบนอกนุ่มใน เสิร์ฟพร้อมน้ำจิ้ม',
+                price: 55,
+                image: 'https://img.wongnai.com/p/1920p0/2020/08/20/a3c5e7b9d1f3a5c7e9b1d3f5a7c9e1b3.jpg'
+            },
+            {
+                id: 7,
+                name: 'ผัดซีอิ๊วหมู',
+                desc: 'ผัดซีอิ๊วหมู ผักกาดขาว คะน้า ซอสเข้มข้น หอมหวาน',
+                price: 50,
+                image: 'https://img.wongnai.com/p/1920p0/2021/01/05/b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1.jpg'
+            },
+            {
+                id: 8,
+                name: 'ต้มข่าไก่',
+                desc: 'ต้มข่าไก่น้ำข้น ข่าหอม กะทิมัน เครื่องเต็ม',
+                price: 90,
+                image: 'https://img.wongnai.com/p/1920p0/2020/03/10/c9e1b3d5f7a9c1e3b5d7f9a1c3e5b7d9.jpg'
+            },
+            {
+                id: 9,
+                name: 'ยำวุ้นเส้น',
+                desc: 'ยำวุ้นเส้นทะเล กุ้งสด ปลาหมึก หอมสมุนไพร',
+                price: 70,
+                badge: 'สดใหม่',
+                image: 'https://img.wongnai.com/p/1920p0/2020/10/15/d5f7a9c1e3b5d7f9a1c3e5b7d9f1a3c5.jpg'
+            },
+            {
+                id: 10,
+                name: 'ข้าวผัดปู',
+                desc: 'ข้าวผัดปู เนื้อปูแท้ ไข่ ผักชี หอมเจียว',
+                price: 85,
+                badge: 'พิเศษ',
+                image: 'https://img.wongnai.com/p/1920p0/2019/06/28/e7a9c1e3b5d7f9a1c3e5b7d9f1a3c5e7.jpg'
+            },
+            {
+                id: 11,
+                name: 'ผัดพริกแกงหมู',
+                desc: 'ผัดพริกแกงหมู พริกแกงหอม ใบมะกรูด ถั่วฝักยาว',
+                price: 60,
+                image: 'https://img.wongnai.com/p/1920p0/2021/03/22/f9a1c3e5b7d9f1a3c5e7b9d1f3a5c7e9.jpg'
+            },
+            {
+                id: 12,
+                name: 'ลาบหมู',
+                desc: 'ลาบหมูอีสาน ข้าวคั่ว พริกป่น ผักสด รสจัดจ้าน',
+                price: 65,
+                image: 'https://img.wongnai.com/p/1920p0/2020/07/08/a1c3e5b7d9f1a3c5e7b9d1f3a5c7e9b1.jpg'
+            },
+            {
+                id: 13,
+                name: 'แกงเผ็ดเป็ดย่าง',
+                desc: 'แกงเผ็ดเป็ดย่าง มะเขือพวง ใบโหระพา กะทิหอม',
+                price: 95,
+                image: 'https://img.wongnai.com/p/1920p0/2019/12/01/b3d5f7a9c1e3b5d7f9a1c3e5b7d9f1a3.jpg'
+            },
+            {
+                id: 14,
+                name: 'ผัดผักรวมมิตร',
+                desc: 'ผัดผักรวมมิตร ผักสดหลากสี น้ำมันหอย กรอบอร่อย',
+                price: 45,
+                image: 'https://img.wongnai.com/p/1920p0/2021/05/17/c5e7b9d1f3a5c7e9b1d3f5a7c9e1b3d5.jpg'
+            },
+            {
+                id: 15,
+                name: 'ข้าวผัดต้มยำกุ้ง',
+                desc: 'ข้าวผัดต้มยำกุ้ง รสเด็ด หอม เปรี้ยว เผ็ด กลมกล่อม',
+                price: 75,
+                badge: 'ใหม่',
+                image: 'https://img.wongnai.com/p/1920p0/2021/08/30/d7f9a1c3e5b7d9f1a3c5e7b9d1f3a5c7.jpg'
+            },
+
+            // ===== เมนูใหม่ 10 รายการ =====
+            {
+                id: 16,
+                name: 'แกงมัสมั่นไก่',
+                desc: 'แกงมัสมั่นไก่ มันฝรั่ง หอมหัวใหญ่ ถั่วลิสง กะทิเข้มข้น',
+                price: 90,
+                badge: 'แนะนำ',
+                image: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=600&q=85'
+            },
+            {
+                id: 17,
+                name: 'ข้าวซอยไก่',
+                desc: 'ข้าวซอยไก่สไตล์เหนือ เส้นทอดกรอบ หอมกะทิ รสเผ็ดหอม',
+                price: 85,
+                badge: 'เหนือแท้',
+                image: 'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600&q=85'
+            },
+            {
+                id: 18,
+                name: 'ปลาราดพริก',
+                desc: 'ปลาทอดกรอบ ราดซอสพริกหวาน เปรี้ยว หอมกระเทียม',
+                price: 110,
+                image: 'https://images.unsplash.com/photo-1625938144755-652e08e359b7?w=600&q=85'
+            },
+            {
+                id: 19,
+                name: 'ไก่ทอดสมุนไพร',
+                desc: 'ไก่ทอดสมุนไพร กรอบนอกนุ่มใน หอมตะไคร้ ใบมะกรูด',
+                price: 75,
+                badge: 'กรอบ!',
+                image: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&q=85'
+            },
+            {
+                id: 20,
+                name: 'ข้าวหน้าเป็ดพะโล้',
+                desc: 'เป็ดพะโล้หอม ห้าเครื่องเทศ ข้าวหอม น้ำพะโล้ข้นเข้มข้น',
+                price: 95,
+                image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&q=85'
+            },
+            {
+                id: 21,
+                name: 'หมูสะเต๊ะ',
+                desc: 'หมูสะเต๊ะย่างหอม เสิร์ฟพร้อมน้ำจิ้มถั่วลิสง อาจาด',
+                price: 65,
+                badge: 'ยอดนิยม',
+                image: 'https://images.unsplash.com/photo-1529006557810-274c58a07b79?w=600&q=85'
+            },
+            {
+                id: 22,
+                name: 'หอยทอด',
+                desc: 'หอยทอดกรอบ หอยนางรม ไข่ ถั่วงอก แป้งกรอบนอก',
+                price: 70,
+                image: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&q=85'
+            },
+            {
+                id: 23,
+                name: 'ผัดหมี่โคราช',
+                desc: 'ผัดหมี่โคราช เส้นหมี่เหลือง ถั่วงอก หมู ไข่ รสกลมกล่อม',
+                price: 55,
+                image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&q=85'
+            },
+            {
+                id: 24,
+                name: 'กุ้งอบวุ้นเส้น',
+                desc: 'กุ้งอบวุ้นเส้นในหม้อดิน ขิงหอม ซีอิ๊ว น้ำมันงา',
+                price: 130,
+                badge: 'พรีเมี่ยม',
+                image: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=600&q=85'
+            },
+            {
+                id: 25,
+                name: 'เป็ดพะโล้',
+                desc: 'เป็ดพะโล้ตุ๋นนุ่ม ห้าเครื่องเทศหอม ไข่พะโล้ เต้าหู้',
+                price: 120,
+                badge: 'ซิกเนเจอร์',
+                image: 'https://images.unsplash.com/photo-1604909052743-94e838986d24?w=600&q=85'
+            }
+        ];
+
+        let cart = [];
+        let locationMode = 'address';
+        let pinLocation = null;
+
+        const LIFF_ID = 'YOUR-LIFF-ID';
+        const GAS_URL = 'YOUR-GOOGLE-APPS-SCRIPT-URL';
+
+        // Fallback image
+        const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=600&q=85';
+
+        window.onload = async () => {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                if (!liff.isLoggedIn()) liff.login();
+                loadMenu();
+            } catch (err) {
+                console.error('LIFF init error:', err);
+                loadMenu();
+            }
+        };
+
+        function loadMenu() {
+            const container = document.getElementById('menuContainer');
+            menuData.forEach(menu => {
+                const badgeHTML = menu.badge ? `<div class="menu-badge">${menu.badge}</div>` : '';
+                container.innerHTML += `
+                    <div class="menu-item">
+                        <div class="menu-image-wrapper">
+                            <img src="${menu.image}"
+                                 alt="${menu.name}"
+                                 class="menu-image"
+                                 onerror="this.src='${FALLBACK_IMAGE}'">
+                            ${badgeHTML}
+                        </div>
+                        <div class="menu-info">
+                            <div class="menu-name">${menu.name}</div>
+                            <div class="menu-desc">${menu.desc}</div>
+                            <div class="menu-footer">
+                                <div class="menu-price">${menu.price}<span>฿</span></div>
+                                <button class="add-btn" onclick="addToCart(${menu.id})">+ เพิ่ม</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(menuId) {
+            const menu = menuData.find(m => m.id === menuId);
+            const existingItem = cart.find(item => item.id === menuId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...menu, quantity: 1 });
+            }
+            updateCartBadge();
+            const badge = document.getElementById('cartBadge');
+            badge.style.transform = 'scale(1.3)';
+            setTimeout(() => badge.style.transform = 'scale(1)', 200);
+        }
+
+        function updateCartBadge() {
+            document.getElementById('cartBadge').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'block';
+            renderCart();
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        function renderCart() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const emptyCartDiv = document.getElementById('emptyCart');
+            const totalSection = document.getElementById('totalSection');
+            const checkoutForm = document.getElementById('checkoutForm');
+
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '';
+                emptyCartDiv.style.display = 'block';
+                totalSection.style.display = 'none';
+                checkoutForm.style.display = 'none';
+                return;
+            }
+
+            emptyCartDiv.style.display = 'none';
+            totalSection.style.display = 'block';
+            checkoutForm.style.display = 'block';
+
+            let cartHTML = '';
+            let total = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                cartHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">${item.price} ฿ × ${item.quantity} = ${itemTotal} ฿</div>
+                        </div>
+                        <div class="cart-item-qty">
+                            <button class="qty-btn" onclick="decreaseQty(${item.id})">−</button>
+                            <span class="qty-display">${item.quantity}</span>
+                            <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItemsDiv.innerHTML = cartHTML;
+            document.getElementById('totalPrice').textContent = total + ' ฿';
+        }
+
+        function increaseQty(menuId) {
+            cart.find(i => i.id === menuId).quantity += 1;
+            updateCartBadge();
+            renderCart();
+        }
+
+        function decreaseQty(menuId) {
+            const item = cart.find(i => i.id === menuId);
+            item.quantity -= 1;
+            if (item.quantity <= 0) cart = cart.filter(i => i.id !== menuId);
+            updateCartBadge();
+            renderCart();
+        }
+
+        function switchLocationMode(mode) {
+            locationMode = mode;
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('addressInput').style.display = mode === 'address' ? 'block' : 'none';
+            document.getElementById('pinInput').style.display = mode === 'pin' ? 'block' : 'none';
+        }
+
+        async function getLocation() {
+            if (!navigator.geolocation) { alert('เบราว์เซอร์ไม่รองรับ GPS'); return; }
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                pinLocation = { lat, lng };
+                const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+                document.getElementById('locationDisplay').innerHTML = `
+                    ✅ ปักหมุดสำเร็จ!<br>
+                    📍 Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}<br>
+                    <a href="${mapLink}" target="_blank">ดูแผนที่</a>
+                `;
+                document.getElementById('locationDisplay').style.display = 'block';
+            } catch {
+                alert('ไม่สามารถเข้าถึงตำแหน่งได้ กรุณาอนุญาตการเข้าถึง Location');
+            }
+        }
+
+        async function submitOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const note = document.getElementById('customerNote').value.trim();
+
+            if (!name || !phone) { alert('กรุณากรอกชื่อและเบอร์โทรศัพท์'); return; }
+            if (locationMode === 'address' && !address) { alert('กรุณากรอกที่อยู่จัดส่ง'); return; }
+            if (locationMode === 'pin' && !pinLocation) { alert('กรุณาปักหมุดตำแหน่ง'); return; }
+
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.submit-btn').disabled = true;
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const orderItems = cart.map(item => `${item.name} x${item.quantity} = ${item.price * item.quantity} ฿`).join('\n');
+            let locationText = locationMode === 'pin'
+                ? `📍 ปักหมุด (Lat: ${pinLocation.lat}, Lng: ${pinLocation.lng})`
+                : address;
+            let mapLink = locationMode === 'pin' ? `https://www.google.com/maps?q=${pinLocation.lat},${pinLocation.lng}` : '';
+
+            const orderMessage = `
+🛒 มีออเดอร์ใหม่!
+
+👤 ลูกค้า: ${name}
+📞 เบอร์: ${phone}
+
+📦 รายการอาหาร:
+${orderItems}
+
+💰 ยอดรวม: ${total} ฿
+
+📍 ที่อยู่จัดส่ง:
+${locationText}
+${mapLink ? '\n🗺️ ดูแผนที่: ' + mapLink : ''}
+${note ? '\n📝 หมายเหตุ: ' + note : ''}
+            `.trim();
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name, phone,
+                        address: locationMode === 'pin' ? `ปักหมุด: ${mapLink}` : address,
+                        items: cart, total, note,
+                        latitude: locationMode === 'pin' ? pinLocation.lat : null,
+                        longitude: locationMode === 'pin' ? pinLocation.lng : null,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (liff.isLoggedIn()) {
+                    await liff.sendMessages([{ type: 'text', text: orderMessage }]);
+                    alert('✅ สั่งอาหารสำเร็จ!\nข้อมูลถูกส่งไปยังร้านแล้ว');
+                    liff.closeWindow();
+                } else {
+                    alert('✅ สั่งอาหารสำเร็จ!\nข้อมูลถูกบันทึกแล้ว');
+                    cart = [];
+                    updateCartBadge();
+                    closeCart();
+                    ['customerName','customerPhone','customerAddress','customerNote'].forEach(id => {
+                        document.getElementById(id).value = '';
+                    });
+                    pinLocation = null;
+                    document.getElementById('locationDisplay').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.submit-btn').disabled = false;
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('cartModal')) closeCart();
+        }
+    </script>
+</body>
+</html>
